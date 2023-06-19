@@ -662,7 +662,6 @@
               <button id="submit-btn" class="bg-yellow-500 hover:bg-yellow-400 text-white font-bold py-2 px-4 mr-4 rounded focus:outline-none focus:shadow-outlin transition duration-300" type="submit">
                 Send
               </button>
-
               <div id="message-container"></div>
             </div>
           </form>
@@ -764,66 +763,63 @@
     </footer>
 
     <!-- Script for Contact us -->
-    <script>function isValidPhoneNumber(phoneNumber) {
-  return /^\+\d+$/.test(phoneNumber);
-}
-
-function showMessage(message, type) {
-  var messageContainer = document.getElementById("message-container");
-  messageContainer.textContent = message;
-
-  if (type === "success") {
-    messageContainer.style.color = "green";
-  } else if (type === "error") {
-    messageContainer.style.color = "red";
-  }
-
-  setTimeout(function () {
-    messageContainer.textContent = "";
-  }, 3000);
-}
-
-function submitForm(event) {
+    <script>var form = document.getElementById('contact-form');
+var submitBtn = document.getElementById('submit-btn');
+var messageContainer = document.getElementById('message-container');
+form.addEventListener('submit', function (event) {
   event.preventDefault();
-  var nameInput = document.getElementById("name");
-  var emailInput = document.getElementById("email");
-  var phoneInput = document.getElementById("phone");
-  var messageInput = document.getElementById("message");
 
-  if (nameInput.value.trim() === "") {
-    showMessage("Please enter your name.", "error");
-    return;
+  if (form.checkValidity()) {
+    var formData = new FormData(form);
+    fetch('/contact', {
+      method: 'POST',
+      body: formData
+    }).then(function (response) {
+      return response.json();
+    }).then(function (data) {
+      form.reset();
+
+      if (data.success) {
+        var successMessage = document.createElement('div');
+        successMessage.textContent = 'Successful';
+        successMessage.classList.add('text-green-500', 'ml-4');
+        messageContainer.innerHTML = '';
+        messageContainer.appendChild(successMessage);
+        setTimeout(function () {
+          successMessage.remove();
+        }, 3000);
+      } else {
+        var errorMessage = document.createElement('div');
+        errorMessage.textContent = 'Error: ' + (data.message || 'Unknown error');
+        errorMessage.classList.add('text-red-500', 'ml-4');
+        messageContainer.innerHTML = '';
+        messageContainer.appendChild(errorMessage);
+        setTimeout(function () {
+          errorMessage.remove();
+        }, 3000);
+      }
+    }).catch(function (error) {
+      console.error(error);
+      var errorMessage = document.createElement('div');
+      errorMessage.textContent = 'An error occurred. Please try again later.';
+      errorMessage.classList.add('text-red-500', 'ml-4');
+      messageContainer.innerHTML = '';
+      messageContainer.appendChild(errorMessage);
+      setTimeout(function () {
+        errorMessage.remove();
+      }, 3000);
+    });
+  } else {
+    var errorMessage = document.createElement('div');
+    errorMessage.textContent = 'Please fill out all required fields.';
+    errorMessage.classList.add('text-red-500', 'ml-4');
+    messageContainer.innerHTML = '';
+    messageContainer.appendChild(errorMessage);
+    setTimeout(function () {
+      errorMessage.remove();
+    }, 3000);
   }
-
-  if (emailInput.value.trim() === "") {
-    showMessage("Please enter your email.", "error");
-    return;
-  }
-
-  if (phoneInput.value.trim() === "") {
-    showMessage("Please enter your phone number.", "error");
-    return;
-  }
-
-  if (!isValidPhoneNumber(phoneInput.value.trim())) {
-    showMessage("Please enter a valid phone number (e.g., +123456789).", "error");
-    return;
-  }
-
-  if (messageInput.value.trim() === "") {
-    showMessage("Please enter your message.", "error");
-    return;
-  }
-
-  showMessage("Success! Your message has been sent.", "success");
-  nameInput.value = "";
-  emailInput.value = "";
-  phoneInput.value = "";
-  messageInput.value = "";
-}
-
-var submitButton = document.getElementById("submit-btn");
-submitButton.addEventListener("click", submitForm);</script>
+});</script>
 
     <!-- Subscribe button -->
     <script>function submitForm(event) {
